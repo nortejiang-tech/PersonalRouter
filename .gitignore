@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.runtime/
+.tools/
+/runtime/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.exe
+*.test
+*.bin
+.DS_Store
+__pycache__/
+*.pyc
