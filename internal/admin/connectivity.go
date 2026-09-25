@@ -246,7 +246,7 @@ func (h *Handler) connectivityClient(ctx context.Context, provider store.Provide
 			return result, messageNoCredentials
 		}
 		snapshot, _, err := h.accountSnapshotForConnectivity(ctx, provider.OAuthProvider)
-		if err != nil || snapshot.count != 1 || snapshot.status != "active" || strings.TrimSuffix(snapshot.prefix, "/") != adapterModelPrefix(provider.OAuthProvider) {
+		if err != nil || snapshot.count != 1 || snapshot.status != "active" {
 			if ctx.Err() != nil {
 				return result, messageTimeout
 			}

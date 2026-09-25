@@ -216,7 +216,7 @@ func TestConnectivityDisabledProviderAndOAuthPrefixIsolation(t *testing.T) {
 				http.Error(w, "bad management key", http.StatusUnauthorized)
 				return
 			}
-			_, _ = io.WriteString(w, `{"files":[{"name":"codex.json","provider":"codex","status":"active","prefix":"nr-codex"}]}`)
+			_, _ = io.WriteString(w, `{"files":[{"name":"codex.json","provider":"codex","status":"active"}]}`)
 		case "/v1/models":
 			if r.Header.Get("Authorization") != "Bearer adapter-secret" {
 				http.Error(w, "management key leak", http.StatusUnauthorized)

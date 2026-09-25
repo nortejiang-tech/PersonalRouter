@@ -28,7 +28,7 @@ export function ModelPage({ client, providers, models, callers, onChange }: Mode
   const selectedProvider = useMemo(() => providers.find((provider) => provider.id === draft.provider_id), [draft.provider_id, providers]);
   const allowedProtocols = selectedProvider?.protocol === "adapter" ? ["openai", "responses", "anthropic"] as const : selectedProvider?.protocol ? [selectedProvider.protocol] as const : [];
 
-  const beginCreate = (provider = providers[0]) => { if (busy) return; setEditingID(null); setDraft(emptyDraft(provider)); setError(""); };
+  const beginCreate = (provider = providers.find((item) => item.id === draft.provider_id) ?? providers[0]) => { if (busy) return; setEditingID(null); setDraft(emptyDraft(provider)); setError(""); };
   const beginEdit = (model: Model) => { if (busy) return; setEditingID(model.id); setDraft(draftFromModel(model)); setError(""); };
   const chooseProvider = (providerID: string) => {
     if (busy) return;
@@ -66,7 +66,16 @@ export function ModelPage({ client, providers, models, callers, onChange }: Mode
     setBusy(true); setError("");
     try {
       const input: ModelInput = { id: draft.id.trim(), provider_id: draft.provider_id, upstream_model: draft.upstream_model.trim(), name: draft.name.trim(), protocols: draft.protocols, input_images: draft.input_images, enabled: draft.enabled, input_price: inputPrice, output_price: outputPrice };
-      await client.saveModel(draft.id.trim(), input); await onChange(); setEditingID(draft.id.trim());
+      const wasCreating = editingID === null;
+      await client.saveModel(draft.id.trim(), input);
+      await onChange();
+      if (wasCreating) {
+        // 新增成功：回到同一上游的全新新增态，避免名称/公开 ID 卡在刚保存的模型上。
+        setEditingID(null);
+        setDraft(emptyDraft(providers.find((item) => item.id === draft.provider_id)));
+      } else {
+        setEditingID(draft.id.trim());
+      }
     } catch (saveError) { setError(displayError(saveError)); } finally { setBusy(false); }
   };
   const disable = async (model: Model) => { if (busy) return; setBusy(true); setError(""); try { const input: ModelInput = { id: model.id, provider_id: model.provider_id, upstream_model: model.upstream_model, name: model.name, protocols: model.protocols, input_images: model.input_images, enabled: false, input_price: model.input_price, output_price: model.output_price }; await client.saveModel(model.id, input); await onChange(); } catch (error) { setError(displayError(error)); } finally { setBusy(false); } };
